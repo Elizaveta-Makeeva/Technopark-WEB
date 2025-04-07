@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 class="h3 fw-bold">New Question</h1>
+        <a href="{% url 'app:hot' %}" class="btn btn-sm btn-outline-primary">Hot Questions</a>
+        <a href="{% url 'app:ask' %}" class="btn btn-sm btn-outline-primary ms-auto">Ask Question</a>
+    </div>
+
+    <div class="d-flex gap-3 flex-column">
+        {% for question in questions %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-2">
+                        <div style="height: 100px;" class="border mb-2 w-100">
+                            <img src="{{ question.author.avatar }}" alt="Question image" class="img-fluid">
+                        </div>
+                        <div>
+                            <input type="number" class="form-control" value="{{ question.rating }}">
+                        </div>
+                    </div>
+                    <div class="col d-flex flex-column justify-content-between">
+                        <div>
+                            <h5 class="card-title fw-bold"><a href="{% url 'app:question' question_id=question.id %}" class="text-decoration-none">{{ question.title }}</a></h5>
+                            <p class="card-text text-muted">{{ question.text }}</p>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <a href="{% url 'app:question' question_id=question.id %}" class="text-decoration-none">
+                                    {{ question.answers_count }} answers
+                                                </a>
+                            </div>
+                            <div class="col text-end">
+                                <span class="text-muted small me-1">Tags:</span>
+                                {% for tag in question.tags %}
+                                <a href="{% url 'app:tag' tag_name=tag %}" class="badge bg-primary text-decoration-none">{{ tag }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% include "pagination.html" with page_obj=questions %}
+    </div>
+</section>
+{% endblock %}

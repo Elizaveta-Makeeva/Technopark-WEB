@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h4 fw-bold mb-4">Settings: {{ user.name }}</h2>
+
+            <form method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="login" class="form-label">Login</label>
+                    <input type="text" class="form-control" id="login" name="username" value="{{ user.name }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}">
+                </div>
+
+                <div class="mb-3">
+                    <label for="nickname" class="form-label">NickName</label>
+                    <input type="text" class="form-control" id="nickname" name="nickname" value="{{ user.name }}">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Upload avatar</label>
+                    <div class="d-flex align-items-center">
+                        <img src="{{ user.avatar }}" class="img-thumbnail me-3" width="100" height="100" alt="Current avatar">
+                        <div class="flex-grow-1">
+                            <div class="input-group">
+                                <input type="text" class="form-control" value="avatar.jpg" readonly>
+                                <input type="file" id="avatar" name="avatar" style="display: none;">
+                                <button class="btn btn-outline-secondary" type="button">Choose</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <a href="{% url 'app:index' %}" class="btn btn-primary">Save</a>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
