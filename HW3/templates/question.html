@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 class="h3 fw-bold">{{ question.title }}</h1>
+        <a href="{% url 'app:hot' %}" class="btn btn-sm btn-outline-primary">Hot Questions</a>
+        <a href="{% url 'app:ask' %}" class="btn btn-sm btn-outline-primary ms-auto">Ask Question</a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-2 text-center">
+                    <div style="height: 100px;" class="border mb-2 w-100">
+                        <img src="{{ question.author.profile.avatar.url }}" class="img-fluid h-100 w-100 object-fit-cover" alt="User avatar">
+                    </div>
+                    <div>
+                        <input type="number" class="form-control" value="{{ question.rating }}">
+                    </div>
+                </div>
+                <div class="col d-flex flex-column justify-content-between">
+                    <p class="card-text text-muted">{{ question.text }}</p>
+                    <div class="row mt-2">
+                        <div class="col text-end">
+                            <span class="text-muted small me-1">Tags:</span>
+                            {% for tag in question.tags.all %}
+                            <a href="{% url 'app:tag' tag_name=tag.name %}" class="badge bg-primary text-decoration-none">
+                                {{ tag.name }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h2 class="h4 fw-bold mb-3">{{ answers_count }} Answers</h2>
+        {% for answer in answers %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-2 text-center">
+                        <div style="height: 100px;" class="border mb-2 w-100">
+                            <img src="{{ answer.author.profile.avatar.url }}" class="img-fluid h-100 w-100 object-fit-cover" alt="User avatar">
+                        </div>
+                        <div>
+                            <input type="number" class="form-control" value="{{ answer.rating }}">
+                        </div>
+                        <div class="mt-2">
+                            <input type="checkbox" class="form-check-input" {% if answer.is_correct %}checked{% endif %}>
+                            <span class="small text-success">Correct!</span>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <p class="card-text">{{ answer.text }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="h5 fw-bold mb-3">Your Answer</h3>
+                <form method="post">
+                    <div class="mb-3">
+                        <textarea class="form-control" name="answer_text" rows="5" placeholder="Enter your answer here." required></textarea>
+                    </div>
+                    <button class="btn btn-primary" type="submit">Answer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% include "pagination.html" with page_obj=answers %}
+</section>
+{% endblock %}
