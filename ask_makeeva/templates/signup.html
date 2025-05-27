@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h4 fw-bold mb-4">Registration</h2>
+
+            {% if form.errors %}
+                <div class="alert alert-danger mb-3" role="alert">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}
+                            {{ error }}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Login</label>
+                    {{ form.username }}
+                    <div class="form-text">Maximum 50 characters</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_email" class="form-label">Email</label>
+                    {{ form.email }}
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_nickname" class="form-label">NickName</label>
+                    {{ form.nickname }}
+                    <div class="form-text">Maximum 50 characters</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_password1" class="form-label">Password</label>
+                    {{ form.password1 }}
+                    <div class="form-text">Maximum 50 characters</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="id_password2" class="form-label">Repeat password</label>
+                    {{ form.password2 }}
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_avatar" class="form-label">Upload avatar</label>
+                    {{ form.avatar }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

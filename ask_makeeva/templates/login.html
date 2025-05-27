@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h4 fw-bold mb-4">Log in</h2>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-3" role="alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.GET.next|default:'' }}">
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label">Login</label>
+                    <input type="text" name="username" class="form-control" id="id_username"
+                           value="{{ form.username.value|default_if_none:'' }}" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" id="id_password" required>
+                </div>
+
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+
+                <button type="submit" class="btn btn-primary w-100">Log in</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'app:signup' %}" class="text-decoration-none">Create new account</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

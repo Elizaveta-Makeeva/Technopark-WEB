@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="col-lg-9">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <h1 class="h3 fw-bold">New Question</h1>
+    </div>
+
+    {% if form.errors %}
+    <div class="alert alert-danger mb-3" role="alert">
+        Please correct the errors below
+    </div>
+    {% endif %}
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="questionTitle" class="form-label fw-bold">Title</label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                        <div class="text-danger">
+                            {% for error in form.title.errors %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Maximum 100 characters</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="questionText" class="form-label fw-bold">Text</label>
+                    {{ form.text }}
+                    {% if form.text.errors %}
+                        <div class="text-danger">
+                            {% for error in form.text.errors %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Maximum 2000 characters</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="questionTags" class="form-label fw-bold">Tags</label>
+                    {{ form.tags }}
+                    {% if form.tags.errors %}
+                        <div class="text-danger">
+                            {% for error in form.tags.errors %}
+                                <small>{{ error }}</small><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Separate tags with commas, maximum 50 characters</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">ASK!</button>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
