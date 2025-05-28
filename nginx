@@ -1,0 +1,30 @@
+server {
+    listen 80;
+    server_name localhost;
+
+    gzip on;
+    gzip_types text/plain text/css application/javascript image/jpeg image/png image/gif;
+    gzip_min_length 1000;
+    gzip_comp_level 5;
+
+    location /static/ {
+        alias /home/elizaveta/projects/ask_makeeva/static/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+        access_log off;
+    }
+
+    location /uploads/ {
+        alias /home/elizaveta/projects/ask_makeeva/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, no-transform";
+        access_log off;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
