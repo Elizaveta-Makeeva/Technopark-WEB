@@ -11,6 +11,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Sum, Value
 from django.db.models.functions import Coalesce
+from django.http import HttpResponse
+
+
+def benchmark_view(request):
+    return HttpResponse("<html><body><h1>Dynamic Test</h1></body></html>")
 
 
 def get_base_context():
@@ -277,3 +282,18 @@ def mark_correct_answer(request):
         return JsonResponse({'status': 'ok'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+def search_suggestions(request):
+    query = request.GET.get('q', '')
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+
+    questions = Question.objects.search(query)
+    results = [{
+        'title': q.title,
+        'url': q.get_absolute_url(),
+        'text': q.text[:100] + '...' if len(q.text) > 100 else q.text
+    } for q in questions]
+
+    return JsonResponse({'results': results})
