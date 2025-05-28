@@ -14,8 +14,25 @@
                     <div style="height: 100px;" class="border mb-2 w-100">
                         <img src="{{ question.author.profile.avatar.url }}" class="img-fluid h-100 w-100 object-fit-cover" alt="User avatar">
                     </div>
-                    <div>
-                        <input type="number" class="form-control" value="{{ question.rating }}">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-success like-btn"
+                                data-question-id="{{ question.id }}" data-value="1"
+                                {% if not user.is_authenticated %}disabled{% endif %}>
+                            ↑
+                        </button>
+                        <input
+                            type="text"
+                            class="form-control text-center question-rating"
+                            data-question-id="{{ question.id }}"
+                            value="{{ question.rating }}"
+                            readonly
+                            style="width: 50px;"
+                        >
+                        <button type="button" class="btn btn-sm btn-outline-danger like-btn"
+                                data-question-id="{{ question.id }}" data-value="-1"
+                                {% if not user.is_authenticated %}disabled{% endif %}>
+                            ↓
+                        </button>
                     </div>
                 </div>
                 <div class="col d-flex flex-column justify-content-between">
@@ -45,11 +62,26 @@
                         <div style="height: 100px;" class="border mb-2 w-100">
                             <img src="{{ answer.author.profile.avatar.url }}" class="img-fluid h-100 w-100 object-fit-cover" alt="User avatar">
                         </div>
-                        <div>
-                            <input type="number" class="form-control" value="{{ answer.rating }}">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-success answer-like-btn"
+                                    data-answer-id="{{ answer.id }}" data-value="1"
+                                    {% if not user.is_authenticated %}disabled{% endif %}>
+                                ↑
+                            </button>
+                            <input type="text" class="form-control text-center answer-rating"
+                                   value="{{ answer.rating }}" readonly style="width: 50px;">
+                            <button type="button" class="btn btn-sm btn-outline-danger answer-like-btn"
+                                    data-answer-id="{{ answer.id }}" data-value="-1"
+                                    {% if not user.is_authenticated %}disabled{% endif %}>
+                                ↓
+                            </button>
                         </div>
                         <div class="mt-2">
-                            <input type="checkbox" class="form-check-input" {% if answer.is_correct %}checked{% endif %}>
+                            <input type="checkbox" class="form-check-input correct-answer-checkbox"
+                                   data-answer-id="{{ answer.id }}"
+                                   data-question-id="{{ question.id }}"
+                                   {% if answer.is_correct %}checked{% endif %}
+                                   {% if question.author != request.user or not user.is_authenticated %}disabled{% endif %}>
                             <span class="small text-success">Correct!</span>
                         </div>
                     </div>
@@ -61,6 +93,7 @@
         </div>
         {% endfor %}
 
+        {% if user.is_authenticated %}
         <div class="card shadow-sm mb-4">
             <div class="card-body">
                 <h3 class="h5 fw-bold mb-3">Your Answer</h3>
@@ -80,6 +113,11 @@
                 </form>
             </div>
         </div>
+        {% else %}
+        <div class="alert alert-info">
+            Please <a href="{% url 'app:login' %}?next={{ request.path }}">log in</a> to post an answer.
+        </div>
+        {% endif %}
     </div>
     {% include "pagination.html" with page_obj=answers %}
 </section>
