@@ -5,8 +5,12 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.views.decorators.csrf import csrf_protect
 from .forms import LoginForm, SignUpForm, SettingsForm, AskForm, AnswerForm
-from .models import Question, Answer, Tag
+from .models import Question, Answer, Tag, QuestionLike, AnswerLike
 from .utils import paginate
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.db.models import Sum, Value
+from django.db.models.functions import Coalesce
 
 
 def get_base_context():
@@ -68,6 +72,9 @@ def question_detail(request, question_id):
     else:
         form = AnswerForm()
 
+
+    question.rating = question.likes.aggregate(rating=Sum('value'))['rating'] or 0
+
     context = get_base_context()
     context.update({
         'question': question,
@@ -77,7 +84,6 @@ def question_detail(request, question_id):
         'form': form
     })
     return render(request, 'question.html', context)
-
 
 @csrf_protect
 def login(request):
@@ -94,6 +100,8 @@ def login(request):
             return redirect('app:index')
     else:
         form = LoginForm(request)
+        initial = {'next': request.GET.get('next', '')}
+        form = LoginForm(request, initial=initial)
 
     context['form'] = form
     return render(request, 'login.html', context)
@@ -118,9 +126,10 @@ def signup(request):
 @csrf_protect
 def logout_view(request):
     if request.method == 'POST':
+        next_url = request.POST.get('next', request.META.get('HTTP_REFERER', '/'))
         auth_logout(request)
-        return redirect('app:index')
-    return redirect(request.META.get('HTTP_REFERER', 'app:index'))
+        return redirect(next_url)
+    return redirect('app:index')
 
 
 @login_required
@@ -165,3 +174,106 @@ def ask(request):
     context = get_base_context()
     context['form'] = form
     return render(request, 'ask.html', context)
+
+
+@require_POST
+@login_required
+def question_like(request):
+    try:
+        question_id = request.POST.get('question_id')
+        value = int(request.POST.get('value'))
+
+        question = Question.objects.get(pk=question_id)
+        like, created = QuestionLike.objects.get_or_create(
+            user=request.user,
+            question=question,
+            defaults={'value': value}
+        )
+
+        if not created:
+            if like.value == value:
+                like.delete()
+            else:
+                like.value = value
+                like.save()
+
+        new_rating = Question.objects.filter(pk=question_id).annotate(
+            rating=Coalesce(Sum('likes__value'), Value(0))
+        ).first().rating
+
+        user_vote = QuestionLike.objects.filter(
+            user=request.user,
+            question=question
+        ).first()
+
+        return JsonResponse({
+            'status': 'ok',
+            'rating': new_rating or 0,
+            'user_vote': user_vote.value if user_vote else 0
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
+
+
+@require_POST
+@login_required
+def answer_like(request):
+    try:
+        answer_id = request.POST.get('answer_id')
+        value = int(request.POST.get('value'))
+
+        answer = Answer.objects.get(pk=answer_id)
+        like, created = AnswerLike.objects.get_or_create(
+            user=request.user,
+            answer=answer,
+            defaults={'value': value}
+        )
+
+        if not created:
+            if like.value == value:
+                like.delete()
+            else:
+                like.value = value
+                like.save()
+
+        new_rating = Answer.objects.filter(pk=answer_id).annotate(
+            rating=Coalesce(Sum('likes__value'), Value(0))
+        ).first().rating
+
+        user_vote = AnswerLike.objects.filter(
+            user=request.user,
+            answer=answer
+        ).first()
+
+        return JsonResponse({
+            'status': 'ok',
+            'rating': new_rating or 0,
+            'user_vote': user_vote.value if user_vote else 0
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
+
+
+@require_POST
+@login_required
+def mark_correct_answer(request):
+    question_id = request.POST.get('question_id')
+    answer_id = request.POST.get('answer_id')
+
+    try:
+        question = Question.objects.get(pk=question_id, author=request.user)
+        answer = Answer.objects.get(pk=answer_id, question=question)
+
+        Answer.objects.filter(question=question).update(is_correct=False)
+        answer.is_correct = True
+        answer.save()
+
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
