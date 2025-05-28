@@ -27,6 +27,8 @@ class LoginForm(AuthenticationForm):
         'invalid_login': "Incorrect login or password"
     }
 
+    next = forms.CharField(widget=forms.HiddenInput(), required=False)
+
 
 class SignUpForm(UserCreationForm):
     def __init__(self, *args, **kwargs):
@@ -114,6 +116,7 @@ class SignUpForm(UserCreationForm):
                 profile.avatar = self.cleaned_data['avatar']
                 profile.save()
         return user
+
 
 class LogoutForm(forms.Form):
     pass
