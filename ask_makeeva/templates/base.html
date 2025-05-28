@@ -7,6 +7,7 @@
     <link href="/static/css/bootstrap.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/static/js/likes.js"></script>
+    <script src="/static/js/search.js"></script>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
     <div class="flex-grow-1">
@@ -14,9 +15,12 @@
             <div class="container">
                 <a class="navbar-brand fw-bold" href="/">StackAnswers</a>
 
-                <form class="d-flex flex-grow-1 mx-4" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search questions..." aria-label="Search">
+                <form class="d-flex flex-grow-1 mx-4" role="search" id="search-form">
+                    <input class="form-control me-2" type="search"
+                           placeholder="Search questions..." aria-label="Search"
+                           id="search-input" autocomplete="off">
                     <button class="btn btn-light" type="submit">Search</button>
+                    <div class="dropdown-menu w-100" id="search-results" style="display: none;"></div>
                 </form>
 
                 <div class="d-flex gap-2 align-items-center">
@@ -66,7 +70,7 @@
                             <h3 class="h5 fw-bold mb-3">Best Members</h3>
                             <div class="d-flex flex-column">
                                 {% for member in best_members %}
-                                <a href="#" class="text-dark fs-5 mb-2 text-decoration-none">{{ member.username }}</a>
+                                <a href="#" class="text-dark fs-5 mb-2 text-decoration-none">{{ member.nickname }}</a>
                                 {% endfor %}
                             </div>
                         </div>
