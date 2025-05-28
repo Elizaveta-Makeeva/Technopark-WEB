@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Count, Sum, Value
 from django.db.models.functions import Coalesce
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Profile(models.Model):
@@ -38,13 +40,45 @@ class QuestionManager(models.Manager):
         )
 
     def get_popular_tags(self):
-        return Tag.objects.annotate(num_questions=Count('questions')).order_by('-num_questions')[:10]
+        three_months_ago = timezone.now() - timedelta(days=90)
+        return Tag.objects.filter(
+            questions__created_at__gte=three_months_ago
+        ).annotate(
+            num_questions=Count('questions')
+        ).order_by('-num_questions')[:10]
 
     def get_best_members(self):
-        return User.objects.annotate(
-            num_answers=Count('answers'),
-            num_questions=Count('questions')
-        ).order_by('-num_answers', '-num_questions')[:10]
+        one_week_ago = timezone.now() - timedelta(days=7)
+
+        top_question_authors = Profile.objects.filter(
+            user__questions__created_at__gte=one_week_ago
+        ).annotate(
+            total_rating=Coalesce(Sum('user__questions__likes__value'), Value(0))
+        ).order_by('-total_rating')[:5]
+
+        top_answer_authors = Profile.objects.filter(
+            user__answers__created_at__gte=one_week_ago
+        ).annotate(
+            total_rating=Coalesce(Sum('user__answers__likes__value'), Value(0))
+        ).order_by('-total_rating')[:5]
+
+        best_members = list(top_question_authors) + list(top_answer_authors)
+        best_members = sorted(
+            set(best_members),
+            key=lambda x: (
+                -x.total_rating if hasattr(x, 'total_rating') else 0,
+                -x.user.answers.count() if hasattr(x.user, 'answers') else 0
+            )
+        )[:10]
+
+        return best_members
+
+
+    def search(self, query):
+        return self.with_details().filter(
+            models.Q(title__icontains=query) |
+            models.Q(text__icontains=query)
+        ).prefetch_related('tags').select_related('author__profile')[:10]
 
 
 class AnswerManager(models.Manager):
