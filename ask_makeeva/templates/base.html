@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>StackAnswers</title>
     <link href="/static/css/bootstrap.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/js/likes.js"></script>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
     <div class="flex-grow-1">
@@ -28,6 +30,7 @@
                             <a href="{% url 'app:edit' %}" class="text-white">Settings</a>
                             <form method="post" action="{% url 'app:logout' %}" class="d-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.path }}">
                                 <button type="submit" class="btn btn-link text-white p-0 border-0">Log out</button>
                             </form>
                         </div>
